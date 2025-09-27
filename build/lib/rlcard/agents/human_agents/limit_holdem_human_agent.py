@@ -2,14 +2,14 @@ from rlcard.utils.utils import print_card
 
 
 class HumanAgent(object):
-    ''' A human agent for Blackjack. It can be used to play alone for understand how the blackjack code runs
+    ''' A human agent for Limit Holdem. It can be used to play against trained models
     '''
 
     def __init__(self, num_actions):
         ''' Initilize the human agent
 
         Args:
-            num_actions (int): the size of the output action space
+            num_actions (int): the size of the ouput action space
         '''
         self.use_raw = True
         self.num_actions = num_actions
@@ -24,21 +24,15 @@ class HumanAgent(object):
         Returns:
             action (int): The action decided by human
         '''
-        _print_state(state['raw_obs'], state['raw_legal_actions'], state['action_record'])
-        while True:
-            user_input = input('>> Você escolhe a ação (apenas o número): ')
-            try:
-                action = int(user_input)
-                if 0 <= action < len(state['legal_actions']):
-                    break
-                else:
-                    print('Ação inválida. Escolha um número válido.')
-            except ValueError:
-                print('Entrada inválida. Digite apenas o número da ação.')
+        _print_state(state['raw_obs'], state['action_record'])
+        action = int(input('>> You choose action (integer): '))
+        while action < 0 or action >= len(state['legal_actions']):
+            print('Action illegal...')
+            action = int(input('>> Re-choose action (integer): '))
         return state['raw_legal_actions'][action]
 
     def eval_step(self, state):
-        ''' Predict the action given the current state for evaluation. The same to step here.
+        ''' Predict the action given the curent state for evaluation. The same to step here.
 
         Args:
             state (numpy.array): an numpy array that represents the current state
@@ -48,7 +42,7 @@ class HumanAgent(object):
         '''
         return self.step(state), {}
 
-def _print_state(state, raw_legal_actions, action_record):
+def _print_state(state, action_record):
     ''' Print out the state
 
     Args:
@@ -61,15 +55,18 @@ def _print_state(state, raw_legal_actions, action_record):
     for pair in _action_list:
         print('>> Player', pair[0], 'chooses', pair[1])
 
-    print('\n=============   Dealer Hand   ===============')
-    print_card(state['dealer hand'])
-
-    num_players = len(state) - 3
-
-    for i in range(num_players):
-        print('===============   Player {} Hand   ==============='.format(i))
-        print_card(state['player' + str(i) + ' hand'])
-
+    print('\n=============== Community Card ===============')
+    print_card(state['public_cards'])
+    print('===============   Your Hand    ===============')
+    print_card(state['hand'])
+    print('===============     Chips      ===============')
+    print('Yours:   ', end='')
+    for _ in range(state['my_chips']):
+        print('+', end='')
+    print('')
+    for i in range(len(state['all_chips'])):
+        for _ in range(state['all_chips'][i]):
+            print('+', end='')
     print('\n=========== Actions You Can Choose ===========')
-    print(', '.join([str(index) + ': ' + action for index, action in enumerate(raw_legal_actions)]))
+    print(', '.join([str(index) + ': ' + action for index, action in enumerate(state['legal_actions'])]))
     print('')

@@ -25,16 +25,10 @@ class HumanAgent(object):
             action (int): The action decided by human
         '''
         _print_state(state['raw_obs'], state['raw_legal_actions'], state['action_record'])
-        while True:
-            user_input = input('>> Você escolhe a ação (apenas o número): ')
-            try:
-                action = int(user_input)
-                if 0 <= action < len(state['legal_actions']):
-                    break
-                else:
-                    print('Ação inválida. Escolha um número válido.')
-            except ValueError:
-                print('Entrada inválida. Digite apenas o número da ação.')
+        action = int(input('>> You choose action (integer): '))
+        while action < 0 or action >= len(state['legal_actions']):
+            print('Action illegal...')
+            action = int(input('>> Re-choose action (integer): '))
         return state['raw_legal_actions'][action]
 
     def eval_step(self, state):
